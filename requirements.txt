@@ -1,0 +1,14 @@
+aniso8601==7.0.0
+click==7.1.2
+fastapi==0.63.0
+graphene==2.1.8
+graphql-core==2.3.2
+graphql-relay==2.0.1
+h11==0.12.0
+promise==2.3
+pydantic==1.7.3
+Rx==1.6.1
+six==1.15.0
+starlette==0.13.6
+typing-extensions==3.7.4.3
+uvicorn==0.13.3
