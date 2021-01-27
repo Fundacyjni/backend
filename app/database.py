@@ -1,9 +1,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+server = os.getenv("serverDB")
+if server is None:
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+else:
+    username = os.getenv("usernameDB")
+    password = os.getenv("passwordDB")
+    SQLALCHEMY_DATABASE_URL = "postgresql://%s:%s@%s" \
+                              % (username, password, server)
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
