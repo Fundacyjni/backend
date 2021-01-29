@@ -39,10 +39,44 @@ class User(BaseModel):
     desc: str
     email: str
     desc: str
-
     image: str
 
     class Config:
+        schema_extra = {
+            "example": [
+                {
+                    "id": 1,
+                    "type": 2,
+                    "date": "2020-04-27T00:00:00",
+                    "username": "fundation",
+                    "visible_name": "fundation example",
+                    "desc": "its example description",
+                    "email": "fundation@fundation.com",
+                    "image": "exampleWeb.pl/url/to/image",
+                    "posts": [
+                        {
+                            "id": 1,
+                            "type": 1,
+                            "date": "2021-01-29T12:00:00",
+                            "title": "example post 1",
+                            "desc": "it's example description",
+                            "long": 100.01,
+                            "lat": 100.4,
+                            "images": [
+                                {
+                                    "id": 1,
+                                    "url": "exampleWeb.pl/url/to/image2"
+                                },
+                                {
+                                    "id": 2,
+                                    "url": "exampleWeb.pl/url/to/image3"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
         orm_mode = True
 
 
