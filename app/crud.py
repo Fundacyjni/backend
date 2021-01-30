@@ -18,3 +18,9 @@ def get_user_by_email(db: Session, email: str):
 
 def get_user_by_userid(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
+
+def get_posts(db: Session, skip: int=0, limit: int = 100):
+    return db.query(models.Post).offset(skip).limit(limit).all()
+
+def get_post_by_id(db: Session, post_id: int):
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
