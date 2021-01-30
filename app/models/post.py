@@ -15,8 +15,8 @@ class Post(Base):
     date = Column(String, default=datetime.now())
     title = Column(String(100))
     desc = Column(String(700))
-    long = Column(DECIMAL)
-    lat = Column(DECIMAL)
+    long = Column(DECIMAL, nullable=True)
+    lat = Column(DECIMAL, nullable=True)
     author_id = Column(Integer, ForeignKey("users.id"))
 
     images = relationship("Images", back_populates="post")
