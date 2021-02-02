@@ -18,7 +18,7 @@ class Images(BaseModel):
 
 class Post(BaseModel):
     id: int
-    type: PostType
+    #type: PostType
     date: datetime = None
     title: str
     desc: str
@@ -85,6 +85,9 @@ class PostResponse(Post):
 
     class Config:
         orm_mode = True
+
+class PostCreate(Post):
+    pass
 
 
 class UserResponse(User):

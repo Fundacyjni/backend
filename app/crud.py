@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from . import models
+from . import schema
 from .models.account_type import AccountType
 
 
@@ -24,3 +25,15 @@ def get_posts(db: Session, skip: int=0, limit: int = 100):
 
 def get_post_by_id(db: Session, post_id: int):
     return db.query(models.Post).filter(models.Post.id == post_id).first()
+
+def create_post(db: Session, post: schema.PostCreate):
+    db_item = models.Post(**post.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+def delete_post(db: Session, post: models.Post):
+    db.delete(post)
+    db.commit()
+    return post

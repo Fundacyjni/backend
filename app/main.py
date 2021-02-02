@@ -15,4 +15,4 @@ app.include_router(posts_router.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello!"}
+    return {"message": "Fundacyjni API, Welcomes you!"}
