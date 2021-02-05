@@ -1,10 +1,15 @@
+import enum
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship
 
-from .post_type import PostType
 from ..database import Base
+
+
+class PostType(enum.Enum):
+    COLLECTION = 1
+    MONETARY = 2
 
 
 class Post(Base):
@@ -17,7 +22,9 @@ class Post(Base):
     desc = Column(String(700))
     long = Column(DECIMAL)
     lat = Column(DECIMAL)
-    author_id = Column(Integer, ForeignKey("users.id"))
 
-    images = relationship("Images", back_populates="post")
+    author_id = Column(Integer, ForeignKey("users.id"))
     author = relationship("User", back_populates="posts")
+
+    # images = relationship("Images", back_populates="post")
+    
