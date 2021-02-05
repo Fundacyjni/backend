@@ -2,7 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from pydantic import BaseModel
+from fastapi import Query
+from pydantic import BaseModel, validator
 
 from app.models.account_type import AccountType
 from app.models.post_type import PostType
@@ -38,7 +39,6 @@ class User(BaseModel):
     visible_name: str
     desc: str
     email: str
-    desc: str
     image: str
 
     class Config:
@@ -93,6 +93,24 @@ class UserResponse(User):
     class Config:
         orm_mode = True
 
+
+class UserCreate(BaseModel):
+    username: str = Query(None, min_length=6, max_length=20)
+    password: str = Query(None, min_length=5, max_length=50,
+                          regex="^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*["
+                                "A-Z]){1}).*$")
+    visible_name: Optional[str] = Query(None, max_length=40)
+    desc: Optional[str] = Query(None, max_length=400)
+    email: str = Query(None, max_length=50)
+    # TOOO(any): Send file
+    type: Optional[AccountType] = AccountType.ORGANIZATION
+
+class UserEdit(BaseModel):
+    username: Optional[str] = Query(None, min_length=6, max_length=20)
+    visible_name: Optional[str] = Query(None, max_length=40)
+    desc: Optional[str] = Query(None, max_length=400)
+    email: Optional[str] = Query(None, max_length=50)
+    type: Optional[AccountType] = AccountType.ORGANIZATION
 
 class TokenData(BaseModel):
     username: Optional[str] = None
