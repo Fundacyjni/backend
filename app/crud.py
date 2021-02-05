@@ -5,10 +5,11 @@ from . import models, schema
 from .models.account_type import AccountType
 import hashlib
 
+from .schema import User
+
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
-
 
 
 def get_users_by_type(db: Session, account_type: AccountType, skip: int = 0, limit: int = 100):
@@ -47,3 +48,24 @@ def create_user(db: Session, user: schema.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_user(db: Session, user: User, userData: schema.UserEdit):
+    if userData.visible_name is not None:
+        user.visible_name = userData.visible_name
+    if userData.desc is not None:
+        user.desc = userData.desc
+    if userData.type is not None:
+        user.type = userData.type
+    if userData.password is not None:
+        password = hashlib.sha256(userData.password.encode('utf-8')).hexdigest()
+        user.password = password
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user: models.User):
+    db.delete(user)
+    db.commit()

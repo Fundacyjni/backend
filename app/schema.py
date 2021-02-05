@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Optional
 
 from fastapi import Query
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
 from app.models.account_type import AccountType
 from app.models.post_type import PostType
@@ -99,18 +99,24 @@ class UserCreate(BaseModel):
     password: str = Query(None, min_length=5, max_length=50,
                           regex="^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*["
                                 "A-Z]){1}).*$")
-    visible_name: Optional[str] = Query(None, max_length=40)
+    visible_name: Optional[str] = Query(None, min_length=6, max_length=40)
     desc: Optional[str] = Query(None, max_length=400)
     email: str = Query(None, max_length=50)
     # TOOO(any): Send file
     type: Optional[AccountType] = AccountType.ORGANIZATION
 
-class UserEdit(BaseModel):
-    username: Optional[str] = Query(None, min_length=6, max_length=20)
-    visible_name: Optional[str] = Query(None, max_length=40)
+
+class UserEditMe(BaseModel):
+    visible_name: Optional[str] = Query(None, min_length=6, max_length=40)
     desc: Optional[str] = Query(None, max_length=400)
-    email: Optional[str] = Query(None, max_length=50)
-    type: Optional[AccountType] = AccountType.ORGANIZATION
+    password: Optional[str] = Query(None, min_length=5, max_length=50,
+                                    regex="^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*["
+                                          "A-Z]){1}).*$")
+
+
+class UserEdit(UserEditMe):
+    type: Optional[AccountType] = None
+
 
 class TokenData(BaseModel):
     username: Optional[str] = None
