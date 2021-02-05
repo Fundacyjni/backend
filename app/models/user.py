@@ -21,4 +21,4 @@ class User(Base):
 
     image = Column(String)
 
-    posts = relationship("Post", back_populates="author")
+    posts = relationship("Post", back_populates="author", cascade="all, delete")
