@@ -1,9 +1,10 @@
+
 import os
 import secrets
 from datetime import timedelta, datetime
 from typing import List, Optional
 
-from app.database import SessionLocal
+from .database import SessionLocal
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status

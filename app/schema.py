@@ -5,7 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from app.models.account_type import AccountType
-from app.models.post_type import PostType
+from app.models.post import PostType
 
 
 class Images(BaseModel):
@@ -63,17 +63,11 @@ class User(BaseModel):
                             "long": 100.01,
                             "lat": 100.4,
                             "images": [
-                                {
-                                    "id": 1,
-                                    "url": "exampleWeb.pl/url/to/image2"
-                                },
-                                {
-                                    "id": 2,
-                                    "url": "exampleWeb.pl/url/to/image3"
-                                }
-                            ]
+                                {"id": 1, "url": "exampleWeb.pl/url/to/image2"},
+                                {"id": 2, "url": "exampleWeb.pl/url/to/image3"},
+                            ],
                         }
-                    ]
+                    ],
                 }
             ]
         }
@@ -82,6 +76,18 @@ class User(BaseModel):
 
 class PostResponse(Post):
     author: User = None
+
+    class Config:
+        orm_mode = True
+
+
+class PostCreate(BaseModel):
+    title: str
+    type: Decimal
+    desc: str
+    long: Decimal
+    lat: Decimal
+    # images: List[Images]
 
     class Config:
         orm_mode = True
