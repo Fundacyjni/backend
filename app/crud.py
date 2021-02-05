@@ -1,8 +1,10 @@
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models
 from . import schema
 from .models.account_type import AccountType
+import hashlib
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -28,6 +30,12 @@ def get_user_by_email(db: Session, email: str):
 def get_user_by_userid(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
+
+def login_user(db, username: str, password: str):
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return db.query(models.User).filter(
+        and_(models.User.password == hashed_password,
+             models.User.username == username)).first()
 
 def get_posts(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Post).offset(skip).limit(limit).all()

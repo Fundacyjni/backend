@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -98,3 +98,12 @@ class UserResponse(User):
 
     class Config:
         orm_mode = True
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
