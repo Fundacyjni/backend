@@ -96,7 +96,7 @@ class UserResponse(User):
 
 class UserCreate(BaseModel):
     username: str = Query(None, min_length=6, max_length=20)
-    password: str = Query(None, min_length=5, max_length=50,
+    password: str = Query(None, min_length=7, max_length=50,
                           regex="^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*["
                                 "A-Z]){1}).*$")
     visible_name: Optional[str] = Query(None, min_length=6, max_length=40)
