@@ -2,10 +2,14 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
+from fastapi import Query
 from pydantic import BaseModel
 
 from app.models.account_type import AccountType
 from app.models.post_type import PostType
+
+regex_security_password = "^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$"  # check if password have uppercase and lowercase letters, digitas and special characters
+regex_email = "^(.+)@(.+)$"
 
 
 class Images(BaseModel):
@@ -38,7 +42,6 @@ class User(BaseModel):
     visible_name: str
     desc: str
     email: str
-    desc: str
     image: str
 
     class Config:
@@ -92,6 +95,28 @@ class UserResponse(User):
 
     class Config:
         orm_mode = True
+
+
+class UserCreate(BaseModel):
+    username: str = Query(None, min_length=2, max_length=100)
+    password: str = Query(None, min_length=8, max_length=100,
+                          regex=regex_security_password)
+    visible_name: Optional[str] = Query(None, min_length=2, max_length=100)
+    desc: Optional[str] = Query(None, max_length=400)
+    email: str = Query(None, max_length=100, regex=regex_email)
+    # TOOO(any): Send file
+    type: Optional[AccountType] = AccountType.ORGANIZATION
+
+
+class UserEditMe(BaseModel):
+    visible_name: Optional[str] = Query(None, min_length=2, max_length=100)
+    desc: Optional[str] = Query(None, max_length=400)
+    password: Optional[str] = Query(None, min_length=8, max_length=100,
+                                    regex=regex_security_password)
+
+
+class UserEdit(UserEditMe):
+    type: Optional[AccountType]
 
 
 class TokenData(BaseModel):
