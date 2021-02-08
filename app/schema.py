@@ -24,7 +24,31 @@ class Post(BaseModel):
     desc: str
     long: Decimal
     lat: Decimal
-    images: List[Images]
+    # images: List[Images]
+
+    class Config:
+        orm_mode = True
+
+
+class PostCreate(BaseModel):
+    title: str
+    type: PostType
+    desc: str
+    long: Decimal
+    lat: Decimal
+    # images: List[Images]
+
+    class Config:
+        orm_mode = True
+
+
+class PostEdit(BaseModel):
+    title: Optional[str]
+    type: Optional[PostType]
+    desc: Optional[str]
+    long: Optional[Decimal]
+    lat: Optional[Decimal]
+    # images: List[Images]
 
     class Config:
         orm_mode = True
@@ -76,18 +100,6 @@ class User(BaseModel):
 
 class PostResponse(Post):
     author: User = None
-
-    class Config:
-        orm_mode = True
-
-
-class PostCreate(BaseModel):
-    title: str
-    type: Decimal
-    desc: str
-    long: Decimal
-    lat: Decimal
-    # images: List[Images]
 
     class Config:
         orm_mode = True

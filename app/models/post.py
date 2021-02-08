@@ -24,7 +24,6 @@ class Post(Base):
     lat = Column(DECIMAL, nullable=True)
 
     author_id = Column(Integer, ForeignKey("users.id"))
-    author = relationship("User", back_populates="posts")
+    author = relationship("User", back_populates="posts", cascade="save-update")
 
     # images = relationship("Images", back_populates="post")
-    

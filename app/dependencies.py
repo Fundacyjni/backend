@@ -1,4 +1,3 @@
-
 import os
 import secrets
 from datetime import timedelta, datetime
@@ -33,7 +32,9 @@ def get_db():
         db.close()
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -55,7 +56,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 def have_user_permission(current_user: User, permission: List[AccountType]):
     if current_user.type not in permission:
-        raise HTTPException(status_code=401, detail="You don't have permission to do this")
+        raise HTTPException(
+            status_code=401, detail="You don't have permission to do this"
+        )
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
