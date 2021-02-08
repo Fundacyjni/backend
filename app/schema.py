@@ -6,7 +6,7 @@ from fastapi import Query
 from pydantic import BaseModel
 
 from app.models.account_type import AccountType
-from app.models.post_type import PostType
+from app.models.post import PostType
 
 regex_security_password = "^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$"  # check if password have uppercase and lowercase letters, digitas and special characters
 regex_email = "^(.+)@(.+)$"
@@ -28,7 +28,31 @@ class Post(BaseModel):
     desc: str
     long: Decimal
     lat: Decimal
-    images: List[Images]
+    # images: List[Images]
+
+    class Config:
+        orm_mode = True
+
+
+class PostCreate(BaseModel):
+    title: str
+    type: PostType
+    desc: str
+    long: Decimal
+    lat: Decimal
+    # images: List[Images]
+
+    class Config:
+        orm_mode = True
+
+
+class PostEdit(BaseModel):
+    title: Optional[str]
+    type: Optional[PostType]
+    desc: Optional[str]
+    long: Optional[Decimal]
+    lat: Optional[Decimal]
+    # images: List[Images]
 
     class Config:
         orm_mode = True
@@ -66,17 +90,11 @@ class User(BaseModel):
                             "long": 100.01,
                             "lat": 100.4,
                             "images": [
-                                {
-                                    "id": 1,
-                                    "url": "exampleWeb.pl/url/to/image2"
-                                },
-                                {
-                                    "id": 2,
-                                    "url": "exampleWeb.pl/url/to/image3"
-                                }
-                            ]
+                                {"id": 1, "url": "exampleWeb.pl/url/to/image2"},
+                                {"id": 2, "url": "exampleWeb.pl/url/to/image3"},
+                            ],
                         }
-                    ]
+                    ],
                 }
             ]
         }
