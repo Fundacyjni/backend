@@ -5,7 +5,7 @@ from starlette.responses import RedirectResponse
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Fundacyjni API", description="", version="0.0.1")
+app = FastAPI(title="Fundacyjni API", description="", version="0.0.2")
 app.include_router(users_router.router)
 app.include_router(auth_router.router)
 app.include_router(posts_router.router)
