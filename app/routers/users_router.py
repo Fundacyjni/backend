@@ -1,7 +1,6 @@
 from typing import List
 
 from fastapi import Depends, APIRouter, HTTPException
-from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app import crud, schema
