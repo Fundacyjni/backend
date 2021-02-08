@@ -32,11 +32,7 @@ async def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(g
     return users
 
 
-@router.get("/users/me", response_model=UserResponse, responses={
-    401: {
-        "description": "Not authenticated, you must have Admin permission"
-    }
-})
+@router.get("/users/me", response_model=UserResponse)
 async def get_user_me(current_user: User = Depends(get_current_user)):
     return current_user
 

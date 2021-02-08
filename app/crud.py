@@ -41,7 +41,7 @@ def create_user(db: Session, user: schema.UserCreate):
         visible_name=user.visible_name,
         desc=user.desc,
         email=user.email,
-        image="Sciezka",
+        image="Sciezka",#TODO(any): Implament sending images
         type=user.type
     )
     db.add(db_user)
