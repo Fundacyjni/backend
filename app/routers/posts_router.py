@@ -3,24 +3,32 @@ from typing import List
 from fastapi import Depends, APIRouter, HTTPException
 from sqlalchemy.orm import Session
 
-from app import crud
-from app.dependencies import get_db
-from app.models import AccountType, User
-from app.schema import PostResponse, PostCreate, PostEdit
-from app.dependencies import get_current_user
+from .. import crud
+from ..dependencies import get_db
+from ..models import AccountType, User
+from ..schema import PostResponse, PostCreate, PostEdit
+from ..dependencies import get_current_user
 
 router = APIRouter(tags=["post"])
 
 
-@router.get("/posts", response_model=List[PostResponse])
+@router.get(
+    "/posts",
+    response_model=List[PostResponse],
+    responses={404: {"description": "Post not found"}},
+)
 async def get_all_posts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     posts = crud.get_posts(db, skip, limit)
     if posts is None:
-        raise HTTPException(status_code=404, detail="Posts not found")
+        raise HTTPException(status_code=404, detail="Post not found")
     return posts
 
 
-@router.post("/posts", response_model=PostResponse)
+@router.post(
+    "/posts",
+    response_model=PostResponse,
+    responses={404: {"description": "Post not found"}},
+)
 async def create_post(
     post: PostCreate,
     db: Session = Depends(get_db),
@@ -30,7 +38,11 @@ async def create_post(
     return posts
 
 
-@router.get("/posts/{post_id}", response_model=PostResponse)
+@router.get(
+    "/posts/{post_id}",
+    response_model=PostResponse,
+    responses={404: {"description": "Post not found"}},
+)
 async def get_post(post_id, db: Session = Depends(get_db)):
     posts = crud.get_post_by_id(db, post_id)
     if posts is None:
@@ -38,8 +50,15 @@ async def get_post(post_id, db: Session = Depends(get_db)):
     return posts
 
 
-@router.patch("/posts/{post_id}", response_model=PostResponse)
-async def edite_post(
+@router.patch(
+    "/posts/{post_id}",
+    response_model=PostResponse,
+    responses={
+        404: {"description": "Post not found"},
+        401: {"description": "Not authenticated, you must have Admin permission"},
+    },
+)
+async def edit_post(
     post_id,
     post_data: PostEdit,
     db: Session = Depends(get_db),
@@ -55,7 +74,11 @@ async def edite_post(
     return post
 
 
-@router.delete("/posts/{post_id}", response_model=PostResponse)
+@router.delete(
+    "/posts/{post_id}",
+    response_model=PostResponse,
+    responses={404: {"description": "Post not found"}},
+)
 async def delete_post(
     post_id,
     db: Session = Depends(get_db),
