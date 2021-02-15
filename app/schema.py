@@ -28,6 +28,7 @@ class Post(BaseModel):
     desc: str
     long: Decimal
     lat: Decimal
+    url: Optional[str]
     # images: List[Images]
 
     class Config:
@@ -40,6 +41,7 @@ class PostCreate(BaseModel):
     desc: str
     long: Decimal
     lat: Decimal
+    url: Optional[str]
     # images: List[Images]
 
     class Config:
@@ -48,10 +50,10 @@ class PostCreate(BaseModel):
 
 class PostEdit(BaseModel):
     title: Optional[str]
-    type: Optional[PostType]
     desc: Optional[str]
     long: Optional[Decimal]
     lat: Optional[Decimal]
+    url: Optional[str]
     # images: List[Images]
 
     class Config:
@@ -67,6 +69,7 @@ class User(BaseModel):
     desc: str
     email: str
     image: str
+    url: Optional[str]
 
     class Config:
         schema_extra = {
@@ -117,11 +120,12 @@ class UserResponse(User):
 
 class UserCreate(BaseModel):
     username: str = Query(None, min_length=2, max_length=100)
-    password: str = Query(None, min_length=8, max_length=100,
-                          regex=regex_security_password)
+    password: str  # = Query(None, min_length=8, max_length=100,
+    #        regex=regex_security_password)
     visible_name: Optional[str] = Query(None, min_length=2, max_length=100)
     desc: Optional[str] = Query(None, max_length=400)
     email: str = Query(None, max_length=100, regex=regex_email)
+    url: Optional[str]
     # TOOO(any): Send file
     type: Optional[AccountType] = AccountType.ORGANIZATION
 
@@ -129,8 +133,10 @@ class UserCreate(BaseModel):
 class UserEditMe(BaseModel):
     visible_name: Optional[str] = Query(None, min_length=2, max_length=100)
     desc: Optional[str] = Query(None, max_length=400)
-    password: Optional[str] = Query(None, min_length=8, max_length=100,
-                                    regex=regex_security_password)
+    password: Optional[str] = Query(
+        None, min_length=8, max_length=100, regex=regex_security_password
+    )
+    url: Optional[str]
 
 
 class UserEdit(UserEditMe):

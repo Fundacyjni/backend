@@ -15,9 +15,10 @@ class User(Base):
     date = Column(String, default=datetime.now())
     username = Column(String(20), unique=True, index=True)
     visible_name = Column(String(40))
-    desc = Column(String(400))
+    desc = Column(String(2000))
     email = Column(String(50), unique=True, index=True)
     password = Column(String)
+    url = Column(String(500), nullable=True)
 
     image = Column(String)
 
