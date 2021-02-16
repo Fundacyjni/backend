@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from . import models, schema
@@ -46,8 +46,44 @@ def login_user(db, username: str, password: str):
     )
 
 
-def get_posts(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Post).offset(skip).limit(limit).all()
+def generateDistance(Post, lat, long):
+    x = Post.long - long
+    y = Post.lat - lat
+    return x * x + y * y
+
+
+def get_posts(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    search: str = None,
+    order: str = None,
+    lat: float = None,
+    long: float = None,
+):
+
+    bufor = db.query(models.Post)
+
+    # TODO: filtering by type
+
+    if not (search is None):
+        bufor = bufor.filter(
+            or_(
+                models.Post.title.like("%" + search + "%"),
+                models.Post.desc.like("%" + search + "%"),
+            )
+        )
+
+    if not (lat is None or long is None):
+        bufor = bufor.order_by(generateDistance(models.Post, lat, long))
+    elif not (order is None):
+        if order[0] == "-":
+            order = order.split("-", 1)[1]
+            bufor = bufor.order_by(getattr(models.Post, order).desc())
+        else:
+            bufor = bufor.order_by(getattr(models.Post, order))
+
+    return bufor.offset(skip).limit(limit).all()
 
 
 def get_post_by_id(db: Session, post_id: int):
