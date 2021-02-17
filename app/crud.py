@@ -1,11 +1,16 @@
+from fastapi import UploadFile
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models, schema
+from .custom_expetion import ImageException
+from .file_service import save_file
 from .models.account_type import AccountType
 import hashlib
 
 from .schema import User
+
+allowed_MIME = ["image/jpeg", "image/png"]
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -13,14 +18,14 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def get_users_by_type(
-    db: Session, account_type: AccountType, skip: int = 0, limit: int = 100
+        db: Session, account_type: AccountType, skip: int = 0, limit: int = 100
 ):
     return (
         db.query(models.User)
-        .filter(models.User.type == account_type)
-        .offset(skip)
-        .limit(limit)
-        .all()
+            .filter(models.User.type == account_type)
+            .offset(skip)
+            .limit(limit)
+            .all()
     )
 
 
@@ -76,18 +81,28 @@ def delete_post(db: Session, post: models.Post):
     db.commit()
     return post
 
-def create_user(db: Session, user: schema.UserCreate):
+
+async def create_user(db: Session, user: schema.UserCreate, avatar: UploadFile = None):
     user.password = hashlib.sha256(user.password.encode('utf-8')).hexdigest()
     if user.visible_name is None:
         user.visible_name = user.username
+    image_url = ""
+    if avatar is not None:
+        if avatar.content_type not in allowed_MIME:
+            raise ImageException()
+
+        data = await avatar.read()
+        extension = avatar.filename.split('.')[-1]
+        image_url = save_file(data, extension)
+
     db_user = models.User(
         username=user.username,
         password=user.password,
         visible_name=user.visible_name,
         desc=user.desc,
         email=user.email,
-        image="Sciezka",#TODO(any): Implament sending images
-        type=user.type
+        image=image_url,
+        type=AccountType(user.type)
     )
     db.add(db_user)
     db.commit()

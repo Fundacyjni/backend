@@ -1,9 +1,11 @@
 from typing import List
 
-from fastapi import Depends, APIRouter, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import Depends, APIRouter, HTTPException, File, UploadFile
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from app import crud, schema
+from app.custom_expetion import ImageException
 from app.dependencies import get_db, get_current_user, have_user_permission
 from app.models.account_type import AccountType
 from app.schema import UserResponse, User, UserEdit
@@ -50,14 +52,17 @@ async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/users", response_model=UserResponse, status_code=201)
-async def create_user(user: schema.UserCreate, db: Session = Depends(get_db),
+async def create_user(user: schema.UserCreate = Depends(schema.UserCreate.as_form),
+                      avatar: UploadFile = File(default=None),
+                      db: Session = Depends(get_db),
                       current_user: User = Depends(get_current_user)):
     have_user_permission(current_user, [AccountType.ADMIN])
     try:
-        user = crud.create_user(db, user)
+        user = await crud.create_user(db, user, avatar)
     except IntegrityError:
         raise HTTPException(status_code=400, detail="User with this email or username already exists")
-
+    except ImageException:
+        raise HTTPException(status_code=400, detail="You must sent correct image (only MIME image/jpg and image/png)")
     return user
 
 
