@@ -67,10 +67,11 @@ async def create_user(user: schema.UserCreate = Depends(schema.UserCreate.as_for
 
 
 @router.patch("/users/me", response_model=UserResponse)
-async def edit_user_me(userData: schema.UserEditMe, db: Session = Depends(get_db),
+async def edit_user_me(userData: schema.UserEditMe = Depends(schema.UserEditMe.as_form),
+                       new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
                        current_user: User = Depends(get_current_user)):
     data = UserEdit(**userData.dict())
-    user = crud.update_user(db, current_user, data)
+    user = await crud.update_user(db, current_user, data, new_avatar)
 
     return user
 

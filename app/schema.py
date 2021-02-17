@@ -140,7 +140,7 @@ class UserCreate(BaseModel):
             visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
             desc: Optional[str] = Form("", max_length=400),
             email: str = Form(..., max_length=100, regex=regex_email),
-            userType: AccountType = Form(AccountType.ORGANIZATION)
+            userType: int = Form(AccountType.ORGANIZATION, lt=3, gt=0)
     ):
         return cls(username=username, password=password, visible_name=visible_name, desc=desc, email=email,
                    type=AccountType(userType))
@@ -151,6 +151,16 @@ class UserEditMe(BaseModel):
     desc: Optional[str] = Query(None, max_length=400)
     password: Optional[str] = Query(None, min_length=8, max_length=100,
                                     regex=regex_security_password)
+
+    @classmethod
+    def as_form(
+            cls,
+            password: str = Form(..., min_length=8, max_length=100,
+                                 regex=regex_security_password),
+            visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
+            desc: Optional[str] = Form("", max_length=400),
+    ):
+        return cls(password=password, visible_name=visible_name, desc=desc)
 
 
 class UserEdit(UserEditMe):

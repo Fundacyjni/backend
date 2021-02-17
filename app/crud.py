@@ -3,14 +3,11 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models, schema
-from .custom_expetion import ImageException
-from .file_service import save_file
+from .file_service import upload_image, reupload_image
 from .models.account_type import AccountType
 import hashlib
 
 from .schema import User
-
-allowed_MIME = ["image/jpeg", "image/png"]
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -88,13 +85,7 @@ async def create_user(db: Session, user: schema.UserCreate, avatar: UploadFile =
         user.visible_name = user.username
     image_url = ""
     if avatar is not None:
-        if avatar.content_type not in allowed_MIME:
-            raise ImageException()
-
-        data = await avatar.read()
-        extension = avatar.filename.split('.')[-1]
-        image_url = save_file(data, extension)
-
+        image_url = await upload_image(avatar)
     db_user = models.User(
         username=user.username,
         password=user.password,
@@ -110,7 +101,7 @@ async def create_user(db: Session, user: schema.UserCreate, avatar: UploadFile =
     return db_user
 
 
-def update_user(db: Session, user: User, userData: schema.UserEdit):
+async def update_user(db: Session, user: User, userData: schema.UserEdit, avatar: UploadFile = None):
     if userData.visible_name is not None:
         user.visible_name = userData.visible_name
     if userData.desc is not None:
@@ -120,7 +111,9 @@ def update_user(db: Session, user: User, userData: schema.UserEdit):
     if userData.password is not None:
         password = hashlib.sha256(userData.password.encode('utf-8')).hexdigest()
         user.password = password
-
+    if avatar is not None:
+        image_url = await reupload_image(user.image, avatar)
+        user.image = image_url
     db.commit()
     db.refresh(user)
     return user
