@@ -19,7 +19,6 @@ def save_file(data: bytes, extension: str):
 
 
 def get_random_string(length):
-    # put your letters in the following string
     sample_letters = 'abcdefghijklmnopqrstuvwxyz1234567890'
     result_str = ''.join((random.choice(sample_letters) for i in range(length)))
     return result_str
