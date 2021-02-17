@@ -8,6 +8,8 @@ import os
 allowed_MIME = ["image/jpeg", "image/png"]
 
 
+# TODO(any): implemant save file in cloud service
+
 def save_file(data: bytes, extension: str):
     name = get_random_string(10) + "." + extension
     file = open(name, "wb")
@@ -15,8 +17,6 @@ def save_file(data: bytes, extension: str):
     file.close()
     return name
 
-
-# TODO(any): implemant save file in cloud service
 
 def get_random_string(length):
     # put your letters in the following string
@@ -39,5 +39,6 @@ async def upload_image(image: UploadFile):
 
 
 async def reupload_image(oldFileSrc: str, image: UploadFile):
-    os.remove(oldFileSrc)
+    if oldFileSrc != "":
+        os.remove(oldFileSrc)
     return await upload_image(image)

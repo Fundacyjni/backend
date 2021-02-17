@@ -140,10 +140,10 @@ class UserCreate(BaseModel):
             visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
             desc: Optional[str] = Form("", max_length=400),
             email: str = Form(..., max_length=100, regex=regex_email),
-            userType: int = Form(AccountType.ORGANIZATION, lt=3, gt=0)
+            type: int = Form(AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0)
     ):
         return cls(username=username, password=password, visible_name=visible_name, desc=desc, email=email,
-                   type=AccountType(userType))
+                   type=AccountType(type))
 
 
 class UserEditMe(BaseModel):
@@ -155,10 +155,10 @@ class UserEditMe(BaseModel):
     @classmethod
     def as_form(
             cls,
-            password: str = Form(..., min_length=8, max_length=100,
+            password: str = Form(None, min_length=8, max_length=100,
                                  regex=regex_security_password),
             visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
-            desc: Optional[str] = Form("", max_length=400),
+            desc: Optional[str] = Form(None, max_length=400),
     ):
         return cls(password=password, visible_name=visible_name, desc=desc)
 
@@ -169,6 +169,17 @@ class UserEdit(UserEditMe):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+    @classmethod
+    def as_form(
+            cls,
+            password: str = Form(None, min_length=8, max_length=100,
+                                 regex=regex_security_password),
+            visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
+            desc: Optional[str] = Form(None, max_length=400),
+            type: Optional[int] = Form(AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0)
+    ):
+        return cls(password=password, visible_name=visible_name, desc=desc, type=AccountType(type))
 
 
 class Token(BaseModel):

@@ -77,10 +77,11 @@ async def edit_user_me(userData: schema.UserEditMe = Depends(schema.UserEditMe.a
 
 
 @router.patch("/users/{user_id}", response_model=UserResponse)
-async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit, db: Session = Depends(get_db),
+async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit = Depends(schema.UserEdit.as_form),
+                               new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
                                current_user: User = Depends(get_current_user)):
     have_user_permission(current_user, [AccountType.ADMIN])
-    user = crud.get_user_by_userid(db, user_id)
+    user = crud.get_user_by_userid(db, user_id, new_avatar)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     user_response = crud.update_user(db, user, userData)
@@ -89,8 +90,8 @@ async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit, db: Sess
 
 
 @router.delete("/users/{user_id}")
-async def edit_user_by_user_id(user_id: int, db: Session = Depends(get_db),
-                               current_user: User = Depends(get_current_user)):
+async def delete_user_by_user_id(user_id: int, db: Session = Depends(get_db),
+                                 current_user: User = Depends(get_current_user)):
     have_user_permission(current_user, [AccountType.ADMIN])
     user = crud.get_user_by_userid(db, user_id)
     if user == current_user:
