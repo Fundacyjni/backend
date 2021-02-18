@@ -60,11 +60,13 @@ def get_posts(
     order: str = None,
     lat: float = None,
     long: float = None,
+    type: models.PostType = None,
 ):
 
     bufor = db.query(models.Post)
 
-    # TODO: filtering by type
+    if not (type is None):
+        bufor = bufor.filter(models.Post.type == type)
 
     if not (search is None):
         bufor = bufor.filter(
