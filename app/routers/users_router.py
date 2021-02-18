@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app import crud, schema
 from app.custom_expetion import ImageException
 from app.dependencies import get_db, get_current_user, have_user_permission
+from app.file_service import max_image_size_KB
 from app.models.account_type import AccountType
 from app.schema import UserResponse, User, UserEdit
 
@@ -62,7 +63,9 @@ async def create_user(user: schema.UserCreate = Depends(schema.UserCreate.as_for
     except IntegrityError:
         raise HTTPException(status_code=400, detail="User with this email or username already exists")
     except ImageException:
-        raise HTTPException(status_code=400, detail="You must sent correct image (only MIME image/jpg and image/png)")
+        raise HTTPException(status_code=400,
+                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+                                   "can be up to " + str(max_image_size_KB) + " KB")
     return user
 
 
@@ -71,8 +74,12 @@ async def edit_user_me(userData: schema.UserEditMe = Depends(schema.UserEditMe.a
                        new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
                        current_user: User = Depends(get_current_user)):
     data = UserEdit(**userData.dict())
-    user = await crud.update_user(db, current_user, data, new_avatar)
-
+    try:
+        user = await crud.update_user(db, current_user, data, new_avatar)
+    except ImageException:
+        raise HTTPException(status_code=400,
+                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+                                   "can be up to" + max_image_size_KB + " KB")
     return user
 
 
@@ -81,9 +88,15 @@ async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit = Depends
                                new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
                                current_user: User = Depends(get_current_user)):
     have_user_permission(current_user, [AccountType.ADMIN])
-    user = crud.get_user_by_userid(db, user_id, new_avatar)
+    try:
+        user = crud.get_user_by_userid(db, user_id, new_avatar)
+    except ImageException:
+        raise HTTPException(status_code=400,
+                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+                                   "can be up to" + max_image_size_KB + " KB")
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+
     user_response = crud.update_user(db, user, userData)
 
     return user_response
