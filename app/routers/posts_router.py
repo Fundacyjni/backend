@@ -2,10 +2,11 @@ from typing import List
 
 from fastapi import Depends, APIRouter, HTTPException
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from .. import crud
 from ..dependencies import get_db
-from ..models import AccountType, User
+from ..models import AccountType, User, PostType
 from ..schema import PostResponse, PostCreate, PostEdit
 from ..dependencies import get_current_user
 
@@ -17,9 +18,18 @@ router = APIRouter(tags=["post"])
     response_model=List[PostResponse],
     responses={404: {"description": "Post not found"}},
 )
-async def get_all_posts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    posts = crud.get_posts(db, skip, limit)
-    if posts is None:
+async def get_all_posts(
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
+    order: Optional[str] = "-date",
+    long: Optional[float] = None,
+    lat: Optional[float] = None,
+    type: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    posts = crud.get_posts(db, skip, limit, search, order, lat, long, PostType(type))
+    if posts is None or posts == []:
         raise HTTPException(status_code=404, detail="Post not found")
     return posts
 

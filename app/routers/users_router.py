@@ -15,19 +15,27 @@ router = APIRouter(tags=["user"])
 
 
 @router.get("/users", response_model=List[UserResponse])
-async def get_organizations(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_organizations(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
     users = crud.get_users_by_type(db, AccountType.ORGANIZATION, skip, limit)
 
     return users
 
 
-@router.get("/admin/users", response_model=List[UserResponse], responses={
-    401: {
-        "description": "Not authenticated, you must have Admin permission"
-    }
-})
-async def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
-                        current_user: User = Depends(get_current_user)):
+@router.get(
+    "/admin/users",
+    response_model=List[UserResponse],
+    responses={
+        401: {"description": "Not authenticated, you must have Admin permission"}
+    },
+)
+async def get_all_users(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     have_user_permission(current_user, [AccountType.ADMIN])
     users = crud.get_users(db, skip, limit)
 
@@ -39,11 +47,11 @@ async def get_user_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.get("/users/{user_id}", response_model=UserResponse, responses={
-    404: {
-        "description": "User not found"
-    }
-})
+@router.get(
+    "/users/{user_id}",
+    response_model=UserResponse,
+    responses={404: {"description": "User not found"}},
+)
 async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user_by_userid(db, user_id)
     if user is None:
@@ -58,6 +66,7 @@ async def create_user(user: schema.UserCreate = Depends(schema.UserCreate.as_for
                       db: Session = Depends(get_db),
                       current_user: User = Depends(get_current_user)):
     have_user_permission(current_user, [AccountType.ADMIN])
+
     try:
         user = await crud.create_user(db, user, avatar)
     except IntegrityError:
