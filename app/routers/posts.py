@@ -1,14 +1,12 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
 
-from .. import crud
-from ..dependencies import get_db
-from ..models import AccountType, User, PostType
-from ..schema import PostResponse, PostCreate, PostEdit
-from ..dependencies import get_current_user
+from ..cruds import posts
+from ..dependencies import get_current_user, get_db
+from ..models import AccountType, PostType, User
+from ..schemats.posts import PostCreate, PostEdit, PostResponse
 
 router = APIRouter(tags=["post"])
 

@@ -2,62 +2,15 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from fastapi import Query, Form
-from pydantic import BaseModel
-
 from app.models.account_type import AccountType
 from app.models.post import PostType
+from fastapi import Form, Query
+from pydantic import BaseModel
+
+from .posts import Post
 
 regex_security_password = "^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$"  # check if password have uppercase and lowercase letters, digitas and special characters
 regex_email = "^(.+)@(.+)$"
-
-
-class Images(BaseModel):
-    id: int
-    url: str
-
-    class Config:
-        orm_mode = True
-
-
-class Post(BaseModel):
-    id: int
-    type: PostType
-    date: datetime = None
-    title: str
-    desc: str
-    long: Decimal
-    lat: Decimal
-    url: Optional[str]
-    # images: List[Images]
-
-    class Config:
-        orm_mode = True
-
-
-class PostCreate(BaseModel):
-    title: str
-    type: PostType
-    desc: str
-    long: Decimal
-    lat: Decimal
-    url: Optional[str]
-    # images: List[Images]
-
-    class Config:
-        orm_mode = True
-
-
-class PostEdit(BaseModel):
-    title: Optional[str]
-    desc: Optional[str]
-    long: Optional[Decimal]
-    lat: Optional[Decimal]
-    url: Optional[str]
-    # images: List[Images]
-
-    class Config:
-        orm_mode = True
 
 
 class User(BaseModel):
@@ -104,13 +57,6 @@ class User(BaseModel):
         orm_mode = True
 
 
-class PostResponse(Post):
-    author: User = None
-
-    class Config:
-        orm_mode = True
-
-
 class UserResponse(User):
     posts: List[Post] = []
 
@@ -135,17 +81,24 @@ class UserCreate(BaseModel):
 
     @classmethod
     def as_form(
-            cls,
-            username: str = Form(..., min_length=2, max_length=100),
-            password: str = Form(..., min_length=8, max_length=100,
-                                 regex=regex_security_password),
-            visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
-            desc: Optional[str] = Form("", max_length=400),
-            email: str = Form(..., max_length=100, regex=regex_email),
-            type: int = Form(AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0)
+        cls,
+        username: str = Form(..., min_length=2, max_length=100),
+        password: str = Form(
+            ..., min_length=8, max_length=100, regex=regex_security_password
+        ),
+        visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
+        desc: Optional[str] = Form("", max_length=400),
+        email: str = Form(..., max_length=100, regex=regex_email),
+        type: int = Form(AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0),
     ):
-        return cls(username=username, password=password, visible_name=visible_name, desc=desc, email=email,
-                   type=AccountType(type))
+        return cls(
+            username=username,
+            password=password,
+            visible_name=visible_name,
+            desc=desc,
+            email=email,
+            type=AccountType(type),
+        )
 
 
 class UserEditMe(BaseModel):
@@ -158,11 +111,12 @@ class UserEditMe(BaseModel):
 
     @classmethod
     def as_form(
-            cls,
-            password: str = Form(None, min_length=8, max_length=100,
-                                 regex=regex_security_password),
-            visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
-            desc: Optional[str] = Form(None, max_length=400),
+        cls,
+        password: str = Form(
+            None, min_length=8, max_length=100, regex=regex_security_password
+        ),
+        visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
+        desc: Optional[str] = Form(None, max_length=400),
     ):
         return cls(password=password, visible_name=visible_name, desc=desc)
 
@@ -176,14 +130,22 @@ class TokenData(BaseModel):
 
     @classmethod
     def as_form(
-            cls,
-            password: str = Form(None, min_length=8, max_length=100,
-                                 regex=regex_security_password),
-            visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
-            desc: Optional[str] = Form(None, max_length=400),
-            type: Optional[int] = Form(AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0)
+        cls,
+        password: str = Form(
+            None, min_length=8, max_length=100, regex=regex_security_password
+        ),
+        visible_name: Optional[str] = Form(None, min_length=2, max_length=100),
+        desc: Optional[str] = Form(None, max_length=400),
+        type: Optional[int] = Form(
+            AccountType.ORGANIZATION, lt=len(AccountType) + 1, gt=0
+        ),
     ):
-        return cls(password=password, visible_name=visible_name, desc=desc, type=AccountType(type))
+        return cls(
+            password=password,
+            visible_name=visible_name,
+            desc=desc,
+            type=AccountType(type),
+        )
 
 
 class Token(BaseModel):

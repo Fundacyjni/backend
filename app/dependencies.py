@@ -1,18 +1,17 @@
 import os
 import secrets
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
-from .database import SessionLocal
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
-
 from sqlalchemy.orm import Session
 
-from . import schema, crud
+from .database import SessionLocal
 from .models import User
 from .models.account_type import AccountType
+from .schemats.users import TokenData
 
 SECRET_KEY = os.environ.get("secretKey")
 if SECRET_KEY is None:
@@ -45,7 +44,7 @@ async def get_current_user(
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = schema.TokenData(username=username)
+        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
     user = crud.get_user_by_email(db, token_data.username)
