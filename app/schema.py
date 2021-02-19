@@ -120,8 +120,9 @@ class UserResponse(User):
 
 class UserCreate(BaseModel):
     username: str = Query(None, min_length=2, max_length=100)
-    password: str  # = Query(None, min_length=8, max_length=100,
-    #        regex=regex_security_password)
+    password: str = Query(
+        None, min_length=8, max_lengh=100, regex=regex_security_password
+    )
     visible_name: Optional[str] = Query(None, min_length=2, max_length=100)
     desc: Optional[str] = Query(None, max_length=400)
     email: str = Query(None, max_length=100, regex=regex_email)
