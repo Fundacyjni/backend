@@ -1,7 +1,7 @@
 import hashlib
 
 from fastapi import UploadFile
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from .. import models

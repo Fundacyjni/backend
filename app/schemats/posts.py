@@ -1,10 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import Optional
 
-from app.models.account_type import AccountType
 from app.models.post import PostType
-from fastapi import Form, Query
 from pydantic import BaseModel
 
 # from .users import User

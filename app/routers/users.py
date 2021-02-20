@@ -17,7 +17,7 @@ router = APIRouter(tags=["user"])
 async def get_organizations(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
-    users = crud.get_users_by_type(db, AccountType.ORGANIZATION, skip, limit)
+    users = users.get_users_by_type(db, AccountType.ORGANIZATION, skip, limit)
 
     return users
 
@@ -36,7 +36,7 @@ async def get_all_users(
     current_user: users.User = Depends(get_current_user),
 ):
     have_user_permission(current_user, [AccountType.ADMIN])
-    users = crud.get_users(db, skip, limit)
+    users = users.get_users(db, skip, limit)
 
     return users
 
@@ -52,7 +52,7 @@ async def get_user_me(current_user: users.User = Depends(get_current_user)):
     responses={404: {"description": "User not found"}},
 )
 async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
-    user = crud.get_user_by_userid(db, user_id)
+    user = users.get_user_by_userid(db, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -69,7 +69,7 @@ async def create_user(
     have_user_permission(current_user, [AccountType.ADMIN])
 
     try:
-        user = await crud.create_user(db, user, avatar)
+        user = await users.create_user(db, user, avatar)
     except IntegrityError:
         raise HTTPException(
             status_code=400, detail="User with this email or username already exists"
@@ -92,7 +92,7 @@ async def edit_user_me(
 ):
     data = UserEdit(**userData.dict())
     try:
-        user = await crud.update_user(db, current_user, data, new_avatar)
+        user = await users.update_user(db, current_user, data, new_avatar)
     except ImageException:
         raise HTTPException(
             status_code=400,
@@ -112,7 +112,7 @@ async def edit_user_by_user_id(
 ):
     have_user_permission(current_user, [AccountType.ADMIN])
     try:
-        user = crud.get_user_by_userid(db, user_id, new_avatar)
+        user = users.get_user_by_userid(db, user_id, new_avatar)
     except ImageException:
         raise HTTPException(
             status_code=400,
@@ -122,7 +122,7 @@ async def edit_user_by_user_id(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_response = crud.update_user(db, user, userData)
+    user_response = users.update_user(db, user, userData)
 
     return user_response
 
@@ -134,11 +134,11 @@ async def delete_user_by_user_id(
     current_user: users.User = Depends(get_current_user),
 ):
     have_user_permission(current_user, [AccountType.ADMIN])
-    user = crud.get_user_by_userid(db, user_id)
+    user = users.get_user_by_userid(db, user_id)
     if user == current_user:
         raise HTTPException(status_code=400, detail="You cannot delete yourself")
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    crud.delete_user(db, user)
+    users.delete_user(db, user)
 
     return {"message": "Deleted"}

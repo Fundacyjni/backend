@@ -1,12 +1,8 @@
-import hashlib
-
-from fastapi import UploadFile
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from .. import models
-from ..file_service import reupload_image, upload_image
-from ..schemats import posts, users
+from ..schemats import posts
 
 
 def generateDistance(Post, lat, long):

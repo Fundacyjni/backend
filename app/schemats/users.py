@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 from typing import List, Optional
 
 from app.models.account_type import AccountType
