@@ -5,8 +5,6 @@ from typing import Optional
 from app.models.post import PostType
 from pydantic import BaseModel
 
-from . import users as u
-
 
 class Images(BaseModel):
     id: int
@@ -56,9 +54,11 @@ class PostEdit(BaseModel):
         orm_mode = True
 
 
+from .users import User
+
+
 class PostResponse(Post):
-    # TODO: fix
-    # author: u.User = None
+    author: User = None
 
     class Config:
         orm_mode = True
