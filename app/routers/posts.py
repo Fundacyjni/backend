@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..cruds import posts
+from ..cruds import posts as crud
 from ..dependencies import get_current_user, get_db, have_user_permission
 from ..models import AccountType, PostType, User
 from ..schemats.posts import PostCreate, PostEdit, PostResponse
@@ -26,7 +26,9 @@ async def get_all_posts(
     type: Optional[int] = None,
     db: Session = Depends(get_db),
 ):
-    posts = posts.get_posts(db, skip, limit, search, order, lat, long, PostType(type))
+    if not (type is None):
+        type = PostType(type)
+    posts = crud.get_posts(db, skip, limit, search, order, lat, long, type)
     if posts is None or posts == []:
         raise HTTPException(status_code=404, detail="Post not found")
     return posts
@@ -42,7 +44,7 @@ async def create_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    posts = posts.create_post(db, post, current_user)
+    posts = crud.create_post(db, post, current_user)
     return posts
 
 
@@ -52,7 +54,7 @@ async def create_post(
     responses={404: {"description": "Post not found"}},
 )
 async def get_post(post_id, db: Session = Depends(get_db)):
-    posts = posts.get_post_by_id(db, post_id)
+    posts = crud.get_post_by_id(db, post_id)
     if posts is None:
         raise HTTPException(status_code=404, detail="Post not found")
     return posts
@@ -72,13 +74,13 @@ async def edit_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    post = posts.get_post_by_id(db, post_id)
+    post = crud.get_post_by_id(db, post_id)
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     if post.author_id != current_user.id:
         have_user_permission(current_user, [AccountType.ADMIN])
 
-    post = posts.edit_post(db, post, post_data)
+    post = crud.edit_post(db, post, post_data)
     return post
 
 
@@ -92,7 +94,7 @@ async def delete_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    posts = posts.get_post_by_id(db, post_id)
+    posts = crud.get_post_by_id(db, post_id)
     if posts is None:
         raise HTTPException(status_code=404, detail="Post not found")
-    return posts.delete_post(db, posts)
+    return crud.delete_post(db, posts)

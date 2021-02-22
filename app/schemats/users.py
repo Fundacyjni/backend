@@ -2,11 +2,10 @@ from datetime import datetime
 from typing import List, Optional
 
 from app.models.account_type import AccountType
-from app.models.post import PostType
 from fastapi import Form, Query
 from pydantic import BaseModel
 
-from .posts import Post
+from . import posts as p
 
 regex_security_password = "^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$"  # check if password have uppercase and lowercase letters, digitas and special characters
 regex_email = "^(.+)@(.+)$"
@@ -57,7 +56,7 @@ class User(BaseModel):
 
 
 class UserResponse(User):
-    posts: List[Post] = []
+    posts: List[p.Post] = []
 
     class Config:
         orm_mode = True
