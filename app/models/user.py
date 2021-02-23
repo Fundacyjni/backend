@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy import Column, Enum, Integer, String
 from sqlalchemy.orm import relationship
 
-from .account_type import AccountType
 from ..database import Base
+from .account_type import AccountType
 
 
 class User(Base):
