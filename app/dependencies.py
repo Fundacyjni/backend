@@ -1,5 +1,7 @@
+import hashlib
 import os
 import secrets
+import random
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -8,15 +10,23 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from .cruds.users import get_user_by_email
+from .cruds import users
 from .database import SessionLocal
 from .models import User
 from .models.account_type import AccountType
 from .schemats.users import TokenData
 
+ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 SECRET_KEY = os.environ.get("secretKey")
 if SECRET_KEY is None:
     SECRET_KEY = secrets.token_hex(32)
+
+SECRET_SALT = os.environ.get("secretSalt")
+if SECRET_SALT is None:
+    SECRET_SALT = ""
+    for i in range(16):
+        SECRET_SALT += random.choice(ALPHABET)
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -33,7 +43,7 @@ def get_db():
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+        token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -48,7 +58,7 @@ async def get_current_user(
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user_by_email(db, token_data.username)
+    user = users.get_user_by_email(db, token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -70,3 +80,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def encrypt_sha256_with_salt(password):
+    salted_pass = password + SECRET_SALT
+    return hashlib.sha256(salted_pass.encode("utf-8")).hexdigest()

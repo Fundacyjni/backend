@@ -5,6 +5,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from .. import models
+from ..dependencies import encrypt_sha256_with_salt
 from ..file_service import reupload_image, upload_image
 from ..models.account_type import AccountType
 from ..schemats import users
@@ -15,14 +16,14 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def get_users_by_type(
-    db: Session, account_type: AccountType, skip: int = 0, limit: int = 100
+        db: Session, account_type: AccountType, skip: int = 0, limit: int = 100
 ):
     return (
         db.query(models.User)
-        .filter(models.User.type == account_type)
-        .offset(skip)
-        .limit(limit)
-        .all()
+            .filter(models.User.type == account_type)
+            .offset(skip)
+            .limit(limit)
+            .all()
     )
 
 
@@ -35,21 +36,21 @@ def get_user_by_userid(db: Session, user_id: int):
 
 
 def login_user(db, username: str, password: str):
-    hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    hashed_password = encrypt_sha256_with_salt(password)
     return (
         db.query(models.User)
-        .filter(
+            .filter(
             and_(
                 models.User.password == hashed_password,
                 models.User.username == username,
             )
         )
-        .first()
+            .first()
     )
 
 
 async def create_user(db: Session, user: users.UserCreate, avatar: UploadFile = None):
-    user.password = hashlib.sha256(user.password.encode("utf-8")).hexdigest()
+    user.password = encrypt_sha256_with_salt(user.password)
     if user.visible_name is None:
         user.visible_name = user.username
     image_url = ""
@@ -71,7 +72,7 @@ async def create_user(db: Session, user: users.UserCreate, avatar: UploadFile = 
 
 
 async def update_user(
-    db: Session, user: users.User, userData: users.UserEdit, avatar: UploadFile = None
+        db: Session, user: users.User, userData: users.UserEdit, avatar: UploadFile = None
 ):
     if userData.visible_name is not None:
         user.visible_name = userData.visible_name
@@ -80,7 +81,7 @@ async def update_user(
     if userData.type is not None:
         user.type = userData.type
     if userData.password is not None:
-        password = hashlib.sha256(userData.password.encode("utf-8")).hexdigest()
+        password = encrypt_sha256_with_salt(userData.password)
         user.password = password
     if avatar is not None:
         image_url = await reupload_image(user.image, avatar)
