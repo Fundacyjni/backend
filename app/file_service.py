@@ -1,9 +1,9 @@
+import os
 import random
 
 from fastapi import UploadFile
 
 from app.custom_expetion import ImageException
-import os
 
 allowed_MIME = ["image/jpeg", "image/png"]
 max_image_size_KB = 500

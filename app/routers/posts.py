@@ -1,14 +1,12 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
 
-from .. import crud
-from ..dependencies import get_db
-from ..models import AccountType, User, PostType
-from ..schema import PostResponse, PostCreate, PostEdit
-from ..dependencies import get_current_user
+from ..cruds import posts as crud
+from ..dependencies import get_current_user, get_db, have_user_permission
+from ..models import AccountType, PostType, User
+from ..schemats.posts import PostCreate, PostEdit, PostResponse
 
 router = APIRouter(tags=["post"])
 
@@ -28,7 +26,9 @@ async def get_all_posts(
     type: Optional[int] = None,
     db: Session = Depends(get_db),
 ):
-    posts = crud.get_posts(db, skip, limit, search, order, lat, long, PostType(type))
+    if not (type is None):
+        type = PostType(type)
+    posts = crud.get_posts(db, skip, limit, search, order, lat, long, type)
     if posts is None or posts == []:
         raise HTTPException(status_code=404, detail="Post not found")
     return posts

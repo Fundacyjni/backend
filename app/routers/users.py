@@ -1,15 +1,14 @@
 from typing import List
 
-from fastapi import Depends, APIRouter, HTTPException, File, UploadFile
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-
-from app import crud, schema
+from app.cruds import users as crud
 from app.custom_expetion import ImageException
-from app.dependencies import get_db, get_current_user, have_user_permission
+from app.dependencies import get_current_user, get_db, have_user_permission
 from app.file_service import max_image_size_KB
 from app.models.account_type import AccountType
-from app.schema import UserResponse, User, UserEdit
+from app.schemats.users import User, UserCreate, UserEdit, UserEditMe, UserResponse
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["user"])
 
@@ -61,48 +60,65 @@ async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/users", response_model=UserResponse, status_code=201)
-async def create_user(user: schema.UserCreate = Depends(schema.UserCreate.as_form),
-                      avatar: UploadFile = File(default=None),
-                      db: Session = Depends(get_db),
-                      current_user: User = Depends(get_current_user)):
+async def create_user(
+    user: UserCreate = Depends(UserCreate.as_form),
+    avatar: UploadFile = File(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     have_user_permission(current_user, [AccountType.ADMIN])
 
     try:
         user = await crud.create_user(db, user, avatar)
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="User with this email or username already exists")
+        raise HTTPException(
+            status_code=400, detail="User with this email or username already exists"
+        )
     except ImageException:
-        raise HTTPException(status_code=400,
-                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
-                                   "can be up to " + str(max_image_size_KB) + " KB")
+        raise HTTPException(
+            status_code=400,
+            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+            "can be up to " + str(max_image_size_KB) + " KB",
+        )
     return user
 
 
 @router.patch("/users/me", response_model=UserResponse)
-async def edit_user_me(userData: schema.UserEditMe = Depends(schema.UserEditMe.as_form),
-                       new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
-                       current_user: User = Depends(get_current_user)):
+async def edit_user_me(
+    userData: UserEditMe = Depends(UserEditMe.as_form),
+    new_avatar: UploadFile = File(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     data = UserEdit(**userData.dict())
     try:
         user = await crud.update_user(db, current_user, data, new_avatar)
     except ImageException:
-        raise HTTPException(status_code=400,
-                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
-                                   "can be up to" + max_image_size_KB + " KB")
+        raise HTTPException(
+            status_code=400,
+            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+            "can be up to" + max_image_size_KB + " KB",
+        )
     return user
 
 
 @router.patch("/users/{user_id}", response_model=UserResponse)
-async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit = Depends(schema.UserEdit.as_form),
-                               new_avatar: UploadFile = File(default=None), db: Session = Depends(get_db),
-                               current_user: User = Depends(get_current_user)):
+async def edit_user_by_user_id(
+    user_id: int,
+    userData: UserEdit = Depends(UserEdit.as_form),
+    new_avatar: UploadFile = File(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     have_user_permission(current_user, [AccountType.ADMIN])
     try:
         user = crud.get_user_by_userid(db, user_id, new_avatar)
     except ImageException:
-        raise HTTPException(status_code=400,
-                            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
-                                   "can be up to" + max_image_size_KB + " KB")
+        raise HTTPException(
+            status_code=400,
+            detail="You must sent correct image (only MIME image/jpg and image/png) and image size "
+            "can be up to" + max_image_size_KB + " KB",
+        )
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -112,8 +128,11 @@ async def edit_user_by_user_id(user_id: int, userData: schema.UserEdit = Depends
 
 
 @router.delete("/users/{user_id}")
-async def delete_user_by_user_id(user_id: int, db: Session = Depends(get_db),
-                                 current_user: User = Depends(get_current_user)):
+async def delete_user_by_user_id(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     have_user_permission(current_user, [AccountType.ADMIN])
     user = crud.get_user_by_userid(db, user_id)
     if user == current_user:
