@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import UploadFile
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .images import create_image
