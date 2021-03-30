@@ -104,7 +104,9 @@ async def delete_post(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    posts = await crud.get_post_by_id(db, post_id)
-    if posts is None:
+    post = crud.get_post_by_id(db, post_id)
+    if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
-    return crud.delete_post(db, posts)
+    if post.author_id != current_user.id:
+        have_user_permission(current_user, [AccountType.ADMIN])
+    return crud.delete_post(db, post)
