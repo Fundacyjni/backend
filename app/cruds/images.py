@@ -30,5 +30,4 @@ def delete_image(db: Session, image: models.Images):
 async def edit_image(db: Session, img: models.Images, image: UploadFile):
     new_url = await reupload_image(img.url, image)
     img.url = new_url
-    print(new_url)
     db.commit()

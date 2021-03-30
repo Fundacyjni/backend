@@ -39,8 +39,6 @@ class PostCreate(BaseModel):
     lat: Decimal
     url: Optional[str]
 
-    # images: List[Images]
-
     class Config:
         orm_mode = True
 
@@ -70,8 +68,6 @@ class PostEdit(BaseModel):
     long: Optional[Decimal]
     lat: Optional[Decimal]
     url: Optional[str]
-
-    # images: List[Images]
 
     class Config:
         orm_mode = True
