@@ -27,4 +27,4 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey("users.id"))
     author = relationship("User", back_populates="posts", cascade="save-update")
 
-    # images = relationship("Images", back_populates="post")
+    images = relationship("Images", back_populates="post")

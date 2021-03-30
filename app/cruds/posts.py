@@ -1,6 +1,10 @@
-from sqlalchemy import and_, or_
+from typing import List
+
+from fastapi import UploadFile
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from .images import create_image
 from .. import models
 from ..schemats import posts
 
@@ -12,16 +16,15 @@ def generateDistance(Post, lat, long):
 
 
 def get_posts(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100,
-    search: str = None,
-    order: str = None,
-    lat: float = None,
-    long: float = None,
-    type: models.PostType = None,
+        db: Session,
+        skip: int = 0,
+        limit: int = 100,
+        search: str = None,
+        order: str = None,
+        lat: float = None,
+        long: float = None,
+        type: models.PostType = None,
 ):
-
     bufor = db.query(models.Post)
 
     if not (type is None):
@@ -51,11 +54,15 @@ def get_post_by_id(db: Session, post_id: int):
     return db.query(models.Post).filter(models.Post.id == post_id).first()
 
 
-def create_post(db: Session, post: posts.PostCreate, user):
+async def create_post(db: Session, post: posts.PostCreate, user, images: List[UploadFile]):
     db_item = models.Post(**post.dict(), author_id=user.id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
+
+    for image in images:
+        await create_image(db, db_item.id, image)
+
     return db_item
 
 

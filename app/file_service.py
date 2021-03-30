@@ -8,6 +8,7 @@ from app.custom_expetion import ImageException
 allowed_MIME = ["image/jpeg", "image/png"]
 max_image_size_KB = 500
 
+
 # TODO(any): implemant save file in cloud service
 
 def save_file(data: bytes, extension: str):
